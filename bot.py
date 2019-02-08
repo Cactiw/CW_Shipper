@@ -32,7 +32,6 @@ def start(bot, update, user_data):
 
 
 
-
 def inline_callback(bot, update, user_data):
     if update.callback_query.data.find("p") == 0:
         pult_callback(bot, update, user_data)

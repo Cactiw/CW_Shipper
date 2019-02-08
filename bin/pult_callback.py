@@ -3,10 +3,22 @@ import logging, traceback
 
 from work_materials.globals import castles as castles_const, classes_list as classes_const, cursor
 from libs.start_pult import rebuild_pult
+from bin.shipper import shipper
 
 
 def pult_callback(bot, update, user_data):
     data = update.callback_query.data
+    pult_status = user_data.get('start_pult_status')
+    if pult_status is None:
+        try:
+            bot.deleteMessage(chat_id=update.callback_query.from_user.id, message_id=update.callback_query.message.message_id)
+        except Unauthorized:
+            pass
+        except BadRequest:
+            pass
+        finally:
+            bot.answerCallbackQuery(callback_query_id=update.callback_query.id, text="Вы уже зарегистрированы!")
+        return
     if data.find("pc") == 0:
         pult_castles_callback(bot, update, user_data)
         return
@@ -62,12 +74,13 @@ def pult_ok_callback(bot, update, user_data):
     castles_to_string = {'🍆': 'Фермы', '🍁': 'Амбера', '☘': 'Оплота', '🌹': 'Розы', '🐢': 'Тортуги',
                          '🦇': 'Замка ночи', '🖤': 'Скалы'}
     castle_print = castles_to_string.get(castle)
-    bot.send_message(chat_id = mes.chat_id,
-                     text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>'.format(game_class, castle, castle_print),
-                     parse_mode = 'HTML')
     request = "insert into players(castle, game_class) values (%s, %s)"
     cursor.execute(request, (castle, game_class))
     print(user_data)
+    bot.send_message(chat_id = mes.chat_id,
+                     text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>'.format(game_class, castle, castle_print),
+                     parse_mode = 'HTML')
+    shipper(bot, update.callback_query.from_user.id, user_data)
 
 
 def edit_pult(bot, chat_id, message_id, reply_markup, callback_query_id):
