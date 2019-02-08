@@ -1,12 +1,17 @@
-from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler
+from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, Filters
 
 from work_materials.globals import updater, dispatcher, job, castles as castles_const, classes_list as classes_const,\
     conn, cursor
 import work_materials.globals as globals
 from libs.start_pult import rebuild_pult
 
-from bin.pult_callback import pult_callback
 from bin.save_load_user_data import loadData, saveData
+
+from bin.pult_callback import pult_callback
+from bin.shipper import shipper, shipper_castle
+
+from work_materials.filters.service_filters import filter_is_admin
+from work_materials.filters.shipper_filters import filter_shipper_castle
 
 import traceback, logging, datetime, threading
 
@@ -31,6 +36,13 @@ def start(bot, update, user_data):
     bot.send_message(chat_id = mes.chat_id, text = "Выберите замок и класс!", reply_markup = reply_markup)
 
 
+def delete_self(bot, update, user_data):
+    user_data.clear()
+    request = "delete from players where telegram_id = %s"
+    cursor.execute(request, (update.message.from_user.id,))
+    bot.send_message(chat_id = update.message.chat_id, text = "Удаление завершено")
+    start(bot, update, user_data)
+
 
 def inline_callback(bot, update, user_data):
     if update.callback_query.data.find("p") == 0:
@@ -38,6 +50,10 @@ def inline_callback(bot, update, user_data):
         return
 
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
+
+dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_castle, pass_user_data=True))
 
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 

@@ -74,8 +74,8 @@ def pult_ok_callback(bot, update, user_data):
     castles_to_string = {'🍆': 'Фермы', '🍁': 'Амбера', '☘': 'Оплота', '🌹': 'Розы', '🐢': 'Тортуги',
                          '🦇': 'Замка ночи', '🖤': 'Скалы'}
     castle_print = castles_to_string.get(castle)
-    request = "insert into players(castle, game_class) values (%s, %s)"
-    cursor.execute(request, (castle, game_class))
+    request = "insert into players(telegram_id, telegram_username, castle, game_class) values (%s, %s, %s, %s)"
+    cursor.execute(request, (update.callback_query.from_user.id, update.callback_query.from_user.username, castle, game_class))
     print(user_data)
     bot.send_message(chat_id = mes.chat_id,
                      text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>'.format(game_class, castle, castle_print),

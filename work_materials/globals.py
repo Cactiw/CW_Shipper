@@ -18,7 +18,7 @@ dispatcher = updater.dispatcher
 job = updater.job_queue
 
 
-
+admin_ids = [231900398, ]
 
 
 
