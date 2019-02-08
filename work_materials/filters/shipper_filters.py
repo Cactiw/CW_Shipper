@@ -9,3 +9,12 @@ class FilterShipperCastle(BaseFilter):
             return False
 
 filter_shipper_castle= FilterShipperCastle()
+
+class FilterShipperClass(BaseFilter):
+    def filter(self, message):
+        try:
+            return (message.text in classes_list or message.text == 'Случайный класс') and dispatcher.user_data.get(message.from_user.id).get('status') == 'choosing class'
+        except TypeError:
+            return False
+
+filter_shipper_class= FilterShipperClass()

@@ -1,7 +1,7 @@
 from telegram.ext import Updater
 from config import ProductionToken, request_kwargs, psql_creditals
 
-import psycopg2
+import psycopg2, pytz, tzlocal
 
 castles = ['🍆', '🍁', '☘', '🌹', '🐢', '🦇', '🖤']
 classes_list = ['⚗️Alchemist', '⚒Blacksmith', '📦Collector', '🏹Ranger', '⚔️Knight', '🛡Sentinel']
@@ -18,9 +18,14 @@ dispatcher = updater.dispatcher
 job = updater.job_queue
 
 
-admin_ids = [231900398, ]
+admin_ids = [231900398, 116028074]
 
 
+moscow_tz = pytz.timezone('Europe/Moscow')
+try:
+    local_tz = tzlocal.get_localzone()
+except pytz.UnknownTimeZoneError:
+    local_tz = pytz.timezone('Europe/Andorra')
 
 def build_menu(buttons,
                n_cols,

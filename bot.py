@@ -8,10 +8,10 @@ from libs.start_pult import rebuild_pult
 from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
-from bin.shipper import shipper, shipper_castle
+from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class
 
 from work_materials.filters.service_filters import filter_is_admin
-from work_materials.filters.shipper_filters import filter_shipper_castle
+from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class
 
 import traceback, logging, datetime, threading
 
@@ -53,7 +53,8 @@ dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
-dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_castle, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_selected_castle, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_class, shipper_selected_class, pass_user_data=True))
 
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 
