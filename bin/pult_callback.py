@@ -41,6 +41,12 @@ def pult_ok_callback(bot, update, user_data):
     pult_status = user_data.get('start_pult_status')
     pult_castle = pult_status.get('castle')
     pult_class = pult_status.get('class')
+    if pult_castle == -1:
+        bot.answerCallbackQuery(callback_query_id=update.callback_query.id, text="Необходимо указать свой замок!")
+        return
+    if pult_class == -1:
+        bot.answerCallbackQuery(callback_query_id=update.callback_query.id, text="Необходимо указать свой класс!")
+        return
     castle = castles_const[pult_castle]
     game_class = classes_const[pult_class]
     user_data.pop('start_pult_status')
