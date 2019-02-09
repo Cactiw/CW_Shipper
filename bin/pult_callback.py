@@ -77,7 +77,7 @@ def pult_ok_callback(bot, update, user_data):
     request = "insert into players(telegram_id, telegram_username, castle, game_class) values (%s, %s, %s, %s) returning player_id"
     cursor.execute(request, (update.callback_query.from_user.id, update.callback_query.from_user.username, castle, game_class))
     row = cursor.fetchone()
-    user_data.update({"player_id" : row[0]})
+    user_data.update({"player_id" : row[0], "castle" : castle, "game_class" : game_class})
     print(user_data)
     bot.send_message(chat_id = mes.chat_id,
                      text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>'.format(game_class, castle, castle_print),

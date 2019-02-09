@@ -8,7 +8,7 @@ from libs.start_pult import rebuild_pult
 from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
-from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class
+from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force
 
 from work_materials.filters.service_filters import filter_is_admin
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class
@@ -49,22 +49,24 @@ def inline_callback(bot, update, user_data):
         pult_callback(bot, update, user_data)
         return
 
+
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_selected_castle, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_class, shipper_selected_class, pass_user_data=True))
 
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 
 loadData()
-updater.start_polling(clean=False)
 save_user_data = threading.Thread(target=saveData, name="Save User Data")
 save_user_data.start()
+updater.start_polling(clean=False)
 
 # Останавливаем бота, если были нажаты Ctrl + C
 updater.idle()
 globals.processing = 0
-# Разрываем подключение.
+# Разрываем подключение к бд.
 conn.close()
