@@ -61,11 +61,10 @@ def shipper_search(bot, update, user_data):
     player_castle = user_data.get("castle")
     player_game_class = user_data.get("game_class")
     player_id = user_data.get("player_id")
-    request = "select telegram_username, times_shippered, player_id, castle, game_class from players "
-    request += "where " if search_castle != -1 or search_class != -1 else ""
-    request += "castle = %s " if search_castle != -1 else "" + "and " if search_class != -1 and search_castle != -1 else "" + "game_class = %s " if search_class != -1 else ""
+    request = "select telegram_username, times_shippered, player_id, castle, game_class from players where telegram_id != %s "
+    request += "and castle = %s " if search_castle != -1 else "" + "and game_class = %s " if search_class != -1 else ""
     request += "order by times_shippered limit 1"
-    args = []
+    args = [update.message.from_user.id]
     if search_castle != -1:
         args.append(search_castle)
     if search_class != -1:
