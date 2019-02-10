@@ -19,8 +19,9 @@ def shipper(bot, update, user_data, force = False):
     else:
         chat_id = update.message.chat_id
     last_shipper_time = user_data.get("last_shipper_time")
+    print(not force, last_shipper_time is not None, last_shipper_time)#, datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time, datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER))
     if not force and last_shipper_time is not None and \
-            last_shipper_time - datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER):
+            datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER):
         response = "Время ещё не пришло. Должно пройти {0} часа после предыдущей попытки.".format(HOURS_BETWEEN_SHIPPER)
         if chat_id in admin_ids:
             response += "\nВы можете пропустить ожидание: /shipper_force"
@@ -61,19 +62,48 @@ def shipper_search(bot, update, user_data):
     player_castle = user_data.get("castle")
     player_game_class = user_data.get("game_class")
     player_id = user_data.get("player_id")
-    request = "select telegram_username, times_shippered, player_id, castle, game_class from players where telegram_id != %s "
-    request += "and castle = %s " if search_castle != -1 else "" + "and game_class = %s " if search_class != -1 else ""
-    request += "order by times_shippered limit 1"
+    print(search_class)
+    request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where telegram_id != %s "
+    request += ("and castle = %s " if search_castle != -1 else "") + ("and game_class = %s " if search_class != -1 else "")
+    request += "order by times_shippered"
     args = [update.message.from_user.id]
     if search_castle != -1:
         args.append(search_castle)
     if search_class != -1:
         args.append(search_class)
-    cursor.execute(request, args)
+    print(request, args)
+    cursor.execute(request, tuple(args))
     row = cursor.fetchone()
+    not_found = False
     if row is None:
-        bot.send_message(chat_id = update.message.chat_id, text = "Любовь найти трудно, мы никого не нашли. Попробуй ещё раз: /shipper")
-        return
+        not_found = True
+        if search_castle != -1 and search_class != -1:
+            request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where " \
+                      "telegram_id != %s and (castle = %s or game_class = %s) order by times_shippered"
+            cursor.execute(request, (update.message.from_user.id, search_castle, search_class))
+            row = cursor.fetchone()
+        if row is None:
+            request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where " \
+                      "telegram_id != %s order by times_shippered"
+            cursor.execute(request, (update.message.from_user.id,))
+            row = cursor.fetchone()
+        if row is None:
+            bot.send_message(chat_id = update.message.chat_id, text = "Любовь найти трудно, мы никого не нашли. Попробуй ещё раз: /shipper")
+            return
+    first_row = row
+    while row:
+        suitable = True
+        for shipper in shippers:
+            if (shipper.initiator.id == update.from_user.id and shipper.shippered.id == row[5]) or \
+                    (shipper.shippered.id == row[5] and shipper.shippered.id == update.message.from_user.id):
+                row = cursor.fetchone()
+                suitable = False
+                break
+        if suitable:
+            break
+    if row is None:
+        row = first_row
+        not_found = True
     times_shippered = row[1] + 1
     now = datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None)
     request = "update players set times_shippered = %s, last_shippered = %s where player_id = %s"
@@ -83,7 +113,12 @@ def shipper_search(bot, update, user_data):
     row_temp = cursor.fetchone()
     current = Shipper(row_temp[0], player_id, update.message.from_user.username, player_castle, player_game_class, row[2], row[0], row[3], row[4], now)
     shippers.append(current)
+    if not not_found:
+        response = "Смотри, кого мы нашли! @{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
+            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0])
+    else:
+        response = "Любовь найти трудно, наиболее близким к запросу оказался @{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
+            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0])
     bot.send_message(chat_id = update.message.chat_id,
-                     text = "Смотри, кого мы нашли! @{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"
-                            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0]))
+                     text = response)
     user_data.update({"last_shipper_time" : now})
