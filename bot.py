@@ -8,10 +8,12 @@ from libs.start_pult import rebuild_pult
 from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
-from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force
+from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel
+from bin.profile import profile
 
 from work_materials.filters.service_filters import filter_is_admin
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class
+from work_materials.filters.shadow_letter_filters import filter_shadow_letter, filter_awaiting_shadow_letter, filter_confirm_shadow_letter, filter_cancel_shadow_letter
 
 import traceback, logging, datetime, threading
 
@@ -51,12 +53,19 @@ def inline_callback(bot, update, user_data):
 
 
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_selected_castle, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_class, shipper_selected_class, pass_user_data=True))
+
+dispatcher.add_handler(MessageHandler(Filters.command & filter_shadow_letter, shadow_letter, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.text & filter_awaiting_shadow_letter, shadow_letter_confirm, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.command & filter_confirm_shadow_letter, shadow_letter_send, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.command & filter_cancel_shadow_letter, shadow_letter_cancel, pass_user_data=True))
+
 
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 

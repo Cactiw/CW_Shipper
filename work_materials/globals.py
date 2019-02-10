@@ -4,6 +4,8 @@ from config import ProductionToken, request_kwargs, psql_creditals
 import psycopg2, pytz, tzlocal
 
 castles = ['🍆', '🍁', '☘', '🌹', '🐢', '🦇', '🖤']
+castles_to_string = {'🍆': 'Фермы', '🍁': 'Амбера', '☘': 'Оплота', '🌹': 'Розы', '🐢': 'Тортуги',
+                     '🦇': 'Замка ночи', '🖤': 'Скалы'}
 classes_list = ['⚗️Alchemist', '⚒Blacksmith', '📦Collector', '🏹Ranger', '⚔️Knight', '🛡Sentinel']
 
 processing = 1

@@ -1,10 +1,11 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.error import BadRequest, Unauthorized, TelegramError
 from work_materials.globals import castles, build_menu, classes_list, cursor, moscow_tz, admin_ids
 from libs.shipper_store import Shipper
 
 import datetime
 
-shippers = []
+shippers = {}
 
 HOURS_BETWEEN_SHIPPER = 4
 
@@ -93,7 +94,7 @@ def shipper_search(bot, update, user_data):
     first_row = row
     while row:
         suitable = True
-        for shipper in shippers:
+        for shipper in list(shippers.values()):
             if (shipper.initiator.id == update.from_user.id and shipper.shippered.id == row[5]) or \
                     (shipper.shippered.id == row[5] and shipper.shippered.id == update.message.from_user.id):
                 row = cursor.fetchone()
@@ -111,8 +112,8 @@ def shipper_search(bot, update, user_data):
     request = "insert into shippers(initiator_player_id, shippered_player_id, time_shippered) VALUES (%s, %s, %s) returning shipper_id"
     cursor.execute(request, (player_id, row[2], now))
     row_temp = cursor.fetchone()
-    current = Shipper(row_temp[0], player_id, update.message.from_user.username, player_castle, player_game_class, row[2], row[0], row[3], row[4], now)
-    shippers.append(current)
+    current = Shipper(row_temp[0], update.message.from_user.id, update.message.from_user.username, player_castle, player_game_class, row[5], row[0], row[3], row[4], now)
+    shippers.update({row_temp[0] : current})
     if not not_found:
         response = "Смотри, кого мы нашли! @{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
             "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0])
@@ -122,3 +123,64 @@ def shipper_search(bot, update, user_data):
     bot.send_message(chat_id = update.message.chat_id,
                      text = response)
     user_data.update({"last_shipper_time" : now})
+
+
+def shadow_letter(bot, update, user_data):
+    mes = update.message
+    try:
+        shipper_id = int(mes.text.partition("@")[0].split("_")[2])
+    except ValueError:
+        bot.send_message(chat_id = mes.chat_id, text = "Проверьте синтаксис и попробуйте ещё раз")
+        return
+    shipper = shippers.get(shipper_id)
+    if shipper is None:
+        bot.send_message(chat_id=mes.chat_id, text="Не найдено. Попробуйте ещё раз")
+        return
+    print(shipper.initiator.telegram_id, mes.from_user.id)
+    if shipper.initiator.telegram_id != mes.from_user.id:
+        bot.send_message(chat_id=mes.chat_id, text="Не надо хитрить!")
+        return
+    user_data.update({"status": "awaiting_shadow_letter", "shipper_to_send" : shipper})
+    bot.send_message(chat_id = mes.chat_id,
+                     text = "Текст, который вы напишете далее будет анонимно отправлен @{0}. "
+                            "Используйте /cancel_shadow_letter для отмены.".format(shipper.shippered.telegram_username))
+
+
+def shadow_letter_confirm(bot, update, user_data):
+    mes = update.message
+    if len(mes.text) > 1900:
+        bot.send_message(chat_id = mes.chat_id, text = "Размер сообщения ограничен 1900 символами!")
+        return
+    bot.send_message(chat_id = mes.chat_id, text = "Следующий текст будет отправлен:\n{0}"
+                                                   "\n\nПодтвердить отправку: /confirm_shadow_letter"
+                                                   "\nОтменить отправку: /cancel_shadow_letter".format(mes.text))
+    user_data.update({"shadow_letter_text" : mes.text, "status": "awaiting_letter_confirmation"})
+
+
+def shadow_letter_send(bot, update, user_data):
+    mes = update.message
+    text = user_data.get("shadow_letter_text")
+    shipper = user_data.get("shipper_to_send")
+    try:
+        bot.send_message(chat_id = shipper.shippered.telegram_id, text = "Кто-то послал вам тайное послание:\n{0}".format(text))
+    except (Unauthorized, BadRequest):
+        bot.send_message(chat_id = mes.chat_id, text = "Невозможно доставить сообщение, возможно, получатель заблокировал бота. Напишите ему сами, не бегите от своего счастья!")
+        return
+    except TelegramError:
+        bot.send_message(chat_id = mes.chat_id, text = "Ошибка при отправке. Вы можете попробовать ещё раз, или написать сами!")
+        return
+    bot.send_message(chat_id = mes.chat_id, text = "Сообщение успешно доставлено! Возможно, вам стоит написать самим, уже не таясь?")
+    user_data.pop("status")
+    user_data.pop("shipper_to_send")
+    user_data.pop("shadow_letter_text")
+    return
+
+def shadow_letter_cancel(bot, update, user_data):
+    pop_list = ["status", "shipper_to_send", "shadow_letter_text"]
+    user_data_list = list(user_data)
+    for item in pop_list:
+        if item in user_data_list:
+            user_data.pop(item)
+    bot.send_message(chat_id = update.message.chat_id, text = "Успешно отменено!")
+
+
