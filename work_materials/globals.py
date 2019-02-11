@@ -20,7 +20,7 @@ dispatcher = updater.dispatcher
 job = updater.job_queue
 
 
-admin_ids = [231900398, 116028074]
+admin_ids = [231900398, 116028074, 618831598]
 
 
 moscow_tz = pytz.timezone('Europe/Moscow')

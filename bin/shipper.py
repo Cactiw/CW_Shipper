@@ -3,11 +3,30 @@ from telegram.error import BadRequest, Unauthorized, TelegramError
 from work_materials.globals import castles, build_menu, classes_list, cursor, moscow_tz, admin_ids
 from libs.shipper_store import Shipper
 
-import datetime
+import datetime, logging
 
 shippers = {}
 
 HOURS_BETWEEN_SHIPPER = 4
+
+
+def fill_shippers():
+    logging.info("Filling shippers...")
+    shippers.clear()
+    request = "select shipper_id, time_shippered, player.telegram_id, " \
+        "player.telegram_username username, player.castle castle, player.game_class game_class, " \
+        "shippered.telegram_id as shippered_telegram_id, shippered.telegram_username as shippered_telegram_username, " \
+        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class from shippers " \
+        "inner join players player ON initiator_player_id = player.player_id " \
+        "inner join players shippered on shippered_player_id = shippered.player_id"
+    cursor.execute(request)
+    row = cursor.fetchone()
+    while row:
+        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1])
+        print(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1])
+        shippers.update({row[0]: current})
+        row = cursor.fetchone()
+    logging.info("Shippers filled")
 
 
 def shipper_force(bot, update, user_data):

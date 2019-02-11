@@ -8,7 +8,7 @@ from libs.start_pult import rebuild_pult
 from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
-from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel
+from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers
 from bin.profile import profile
 
 from work_materials.filters.service_filters import filter_is_admin
@@ -70,6 +70,7 @@ dispatcher.add_handler(MessageHandler(Filters.command & filter_cancel_shadow_let
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 
 loadData()
+fill_shippers()
 save_user_data = threading.Thread(target=saveData, name="Save User Data")
 save_user_data.start()
 updater.start_polling(clean=False)
