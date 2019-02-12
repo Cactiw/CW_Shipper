@@ -9,12 +9,15 @@ from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
 from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, \
-    shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers, shipper_mute, shipper_unmute
+    shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers, shipper_mute, shipper_unmute, \
+    reply_to_message, reply_confirm, reply_cancel, reply_send, fill_sent_messages
 from bin.profile import profile, shipper_history
 
 from work_materials.filters.service_filters import filter_is_admin, filter_only_registration, filter_delete_yourself
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class, filter_mute_shipper, filter_unmute_shipper
-from work_materials.filters.shadow_letter_filters import filter_shadow_letter, filter_awaiting_shadow_letter, filter_confirm_shadow_letter, filter_cancel_shadow_letter
+from work_materials.filters.shadow_letter_filters import filter_shadow_letter, filter_awaiting_shadow_letter, \
+    filter_confirm_shadow_letter, filter_cancel_shadow_letter, filter_reply_to_message, filter_awaiting_reply, \
+    filter_confirm_reply, filter_cancel_reply
 
 import traceback, logging, datetime, threading
 
@@ -98,12 +101,18 @@ dispatcher.add_handler(MessageHandler(Filters.command & filter_cancel_shadow_let
 dispatcher.add_handler(MessageHandler(Filters.command & filter_mute_shipper, shipper_mute, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.command & filter_unmute_shipper, shipper_unmute, pass_user_data=True))
 
+dispatcher.add_handler(MessageHandler(Filters.command & filter_reply_to_message, reply_to_message, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.text & filter_awaiting_reply, reply_confirm, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.command & filter_confirm_reply, reply_send, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.command & filter_cancel_reply, reply_cancel, pass_user_data=True))
+
 dispatcher.add_handler(MessageHandler(Filters.all, unknown_message))
 
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 
 loadData()
 fill_shippers()
+fill_sent_messages()
 save_user_data = threading.Thread(target=saveData, name="Save User Data")
 save_user_data.start()
 updater.start_polling(clean=False)

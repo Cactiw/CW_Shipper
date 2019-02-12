@@ -19,3 +19,12 @@ class Player:
         self.telegram_username = telegram_username
         self.castle = castle
         self.game_class = game_class
+
+
+class Message:
+
+    def __init__(self, message_id, shipper_id, time_send, answered = False):
+        self.message_id = message_id
+        self.shipper_id = shipper_id
+        self.time_send = time_send
+        self.answered = answered

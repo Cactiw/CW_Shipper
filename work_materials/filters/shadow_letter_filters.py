@@ -33,3 +33,36 @@ class FilterShadowLetterCancel(BaseFilter):
                 or user_data.get("status") == "awaiting_shadow_letter")
 
 filter_cancel_shadow_letter= FilterShadowLetterCancel()
+
+
+class FilterReplyToMessage(BaseFilter):
+    def filter(self, message):
+        return message.text.find("/reply_to_message_") == 0
+
+filter_reply_to_message= FilterReplyToMessage()
+
+
+class FilterAwaitingReply(BaseFilter):
+    def filter(self, message):
+        user_data = dispatcher.user_data.get(message.from_user.id)
+        return user_data and user_data.get("status") == "awaiting_reply"
+
+filter_awaiting_reply= FilterAwaitingReply()
+
+
+class FilterReplyConfirm(BaseFilter):
+    def filter(self, message):
+        user_data = dispatcher.user_data.get(message.from_user.id)
+        return message.text == "/confirm_reply" and user_data and user_data.get("status") == "awaiting_reply_confirmation"
+
+filter_confirm_reply= FilterReplyConfirm()
+
+
+class FilterReplyCancel(BaseFilter):
+    def filter(self, message):
+        user_data = dispatcher.user_data.get(message.from_user.id)
+        return message.text == "/cancel_reply" and user_data and \
+               (user_data.get("status") == "awaiting_reply"
+                or user_data.get("status") == "awaiting_reply_confirmation")
+
+filter_cancel_reply= FilterReplyCancel()
