@@ -3,7 +3,7 @@ from telegram.error import BadRequest, Unauthorized, TelegramError
 from work_materials.globals import castles, build_menu, classes_list, cursor, moscow_tz, admin_ids, castles_to_string
 from libs.shipper_store import Shipper
 
-import datetime, logging, traceback
+import datetime, logging, traceback, random
 
 shippers = {}
 
@@ -85,7 +85,10 @@ def shipper_search(bot, update, user_data):
     player_id = user_data.get("player_id")
     request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where telegram_id != %s "
     request += ("and castle = %s " if search_castle != -1 else "") + ("and game_class = %s " if search_class != -1 else "")
-    request += "order by times_shippered"
+    if random.randint(0, 1):
+        request += "order by times_shippered, last_shippered"
+    else:
+        request += "order by last_shippered, times_shippered"
     args = [update.message.from_user.id]
     if search_castle != -1:
         args.append(search_castle)
