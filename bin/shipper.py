@@ -41,13 +41,13 @@ def shipper(bot, update, user_data, force=False):
         chat_id = update.message.chat_id
     last_shipper_time = user_data.get("last_shipper_time")
     print(not force, last_shipper_time is not None, last_shipper_time)#, datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time, datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER))
-    if not force and last_shipper_time is not None and \
+    """if not force and last_shipper_time is not None and \
             datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER):
         response = "Время ещё не пришло. Должно пройти {0} часа после предыдущей попытки.".format(HOURS_BETWEEN_SHIPPER)
         if chat_id in admin_ids:
             response += "\nВы можете пропустить ожидание: /shipper_force"
         bot.send_message(chat_id=chat_id, text=response)
-        return
+        return"""   #TODO вернуть
     __castle_buttons = []
     for castle in castles:
         __castle_buttons.append(KeyboardButton(castle))

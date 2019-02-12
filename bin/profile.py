@@ -13,7 +13,7 @@ def profile(bot, update, user_data):
         bot.send_message(chat_id = mes.chat_id, text = "Вы не зарегистрированы! Используйте /start")
         return
     last_time_shipper_used = user_data.get("last_shipper_time")
-    response = "<b>{0}</b> --- <b>{1}</b> <b>{2}</b>\n".format(row[0], row[4], row[3] + castles_to_string.get(row[3]), last_time_shipper_used.strftime("%D :: %H:%M"))
+    response = "<b>{0}</b> --- <b>{1}</b> <b>{2}</b>\n".format(row[0], row[4], row[3] + castles_to_string.get(row[3]))
     response += ("Последний поиск: {0}".format(last_time_shipper_used.strftime("%D :: %H:%M")) if last_time_shipper_used else "") + "\n\n"
     response += "История поиска: /shipper_history"
     bot.send_message(chat_id = mes.chat_id, text = response, parse_mode = 'HTML')
