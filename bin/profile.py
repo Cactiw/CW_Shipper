@@ -25,11 +25,11 @@ def shipper_history(bot, update, user_data):
     i = 0
     new_response = ""
     for shipper in shippers_list:
-        i += 1
         if shipper.initiator.telegram_id == update.message.from_user.id:
+            i += 1
             new_response = "{5} - @{0} <b>{1}</b> <b>{2}</b> ---- {3}\nОтправить тайное послание: /shadow_letter_{4}\n\n".format(shipper.shippered.telegram_username,
-                                                                    shipper.shippered.game_class, shipper.shippered.castle + castles_to_string.get(shipper.shippered.castle),
-                                                                    shipper.time_shippered.strftime("%D :: %H:%M"), shipper.shipper_id, i)
+                                                                                                                                 shipper.shippered.game_class, shipper.shippered.castle + castles_to_string.get(shipper.shippered.castle),
+                                                                                                                                 shipper.time_shippered.strftime("%D :: %H:%M"), shipper.shipper_id, i)
             if len(response + new_response) > MESSAGE_LENGTH_LIMIT:
                 bot.send_message(chat_id=update.message.chat_id, text=response, parse_mode='HTML')
                 response = ""
