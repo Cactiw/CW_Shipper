@@ -1,7 +1,7 @@
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, Filters
 
 from work_materials.globals import updater, dispatcher, job, castles as castles_const, classes_list as classes_const,\
-    conn, cursor
+    conn, cursor, admin_ids
 import work_materials.globals as globals
 from libs.start_pult import rebuild_pult
 
@@ -47,6 +47,20 @@ def delete_self(bot, update, user_data):
     start(bot, update, user_data)
 
 
+def help(bot, update):
+    response = "Данный бот предназначен для помощи игрокам чв в нахождении вторых половинок и приурочен к 14 февраля.\nСписок доступных команд:\n"
+    response += "/start - Регистрация в боте, всё очевидно.\n/shipper - Начать процесс поиска, можно использовать 1 раз в 4 часа\n"
+    response += "/delete_self - Удаление регистрации, можно использовать до первого успешного /shipper\n"
+    response += "/profile - Отображение основной информации.\n/shipper_history - Отображение истории поиска\n"
+    response += "Так же доступны некоторые другие команды, подсказки будут возникать по ходу использования.\n\n"
+    if update.message.from_user.id in admin_ids:
+        response += "<b>Admin features:</b>\n"
+        response += "/delete_self - аналогично, но работает в любое время (использовать с огромной осторожностью, " \
+                    "возможна значительная потеря данных\n/shipper_force - Тот же шиппер, но с игнорированием временных " \
+                    "ограничений, не будет учитываться в статистике и при самом шиппере."
+    bot.send_message(chat_id = update.message.chat_id, text = response, parse_mode = 'HTML')
+
+
 def inline_callback(bot, update, user_data):
     if update.callback_query.data.find("p") == 0:
         pult_callback(bot, update, user_data)
@@ -54,7 +68,9 @@ def inline_callback(bot, update, user_data):
 
 
 def only_registration(bot, update):
-    bot.send_message(chat_id = update.message.chat_id, text = "До 14 февраля доступна только регистрация! Наберитесь терпения!\nВы можете использовать /profile для проверки регистрации")
+    bot.send_message(chat_id = update.message.chat_id,
+                     text = "До 14 февраля доступна только регистрация! Наберитесь терпения!\n"
+                            "Вы можете использовать /profile для проверки регистрации")
 
 
 def unknown_message(bot, update):
@@ -62,6 +78,7 @@ def unknown_message(bot, update):
 
 
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_history', shipper_history, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
