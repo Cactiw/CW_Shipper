@@ -182,6 +182,9 @@ def shadow_letter_send(bot, update, user_data):
     shipper = user_data.get("shipper_to_send")
     if shipper.muted:
         bot.send_message(chat_id=mes.chat_id, text="Этот человек отключил сообщения от вас. Возможно, когда-нибудь, он включит их обратно.")
+        user_data.pop("status")
+        user_data.pop("shipper_to_send")
+        user_data.pop("shadow_letter_text")
         return
     try:
         bot.send_message(chat_id = shipper.shippered.telegram_id,
@@ -218,7 +221,28 @@ def shipper_mute(bot, update, user_data):
     shipper.muted = True
     request = "update shippers set muted = TRUE where shipper_id = %s"
     cursor.execute(request, (shipper.shipper_id,))
-    bot.send_message(chat_id = mes.chat_id, text = "Готово! Этот человек вас больше не побеспокоит")
+    bot.send_message(chat_id = mes.chat_id, text = "Готово! Этот человек вас больше не побеспокоит\nВы можете отменить своё решение: /unmute_shipper_{0}".format(shipper_id))
+
+
+def shipper_unmute(bot, update, user_data):
+    mes = update.message
+    try:
+        shipper_id = int(mes.text.split('_')[2].partition("@")[0])
+    except Exception:
+        logging.error(traceback.format_exc())
+        bot.send_message(chat_id=mes.chat_id, text="Произошла ошибка. Проверьте синтаксис.")
+        return
+    shipper = shippers.get(shipper_id)
+    if shipper is None or shipper.shippered.telegram_id != mes.from_user.id:
+        bot.send_message(chat_id=mes.chat_id, text="Не найдено. Правильный номер поиска?")
+        return
+    if not shipper.muted:
+        bot.send_message(chat_id=mes.chat_id, text="Сообщения пока ещё включены!")
+        return
+    shipper.muted = False
+    request = "update shippers set muted = FALSE where shipper_id = %s"
+    cursor.execute(request, (shipper.shipper_id,))
+    bot.send_message(chat_id=mes.chat_id, text="Готово! Вы снова можете получать сообщения от этого человека")
 
 
 def shadow_letter_cancel(bot, update, user_data):

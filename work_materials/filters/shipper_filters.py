@@ -27,3 +27,10 @@ class FilterMuteShipper(BaseFilter):
         return message.text.find("/mute_shipper_") == 0
 
 filter_mute_shipper = FilterMuteShipper()
+
+
+class FilterUnmuteShipper(BaseFilter):
+    def filter(self, message):
+        return message.text.find("/unmute_shipper_") == 0
+
+filter_unmute_shipper = FilterUnmuteShipper()
