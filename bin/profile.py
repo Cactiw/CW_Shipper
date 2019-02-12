@@ -34,7 +34,7 @@ def shipper_history(bot, update, user_data):
                 bot.send_message(chat_id=update.message.chat_id, text=response, parse_mode='HTML')
                 response = ""
             response += new_response
-    new_response += "\nВсего выполнено поисков: {0}".format(i)
+    new_response = "\nВсего выполнено поисков: {0}".format(i)
     if len(response + new_response) > MESSAGE_LENGTH_LIMIT:
         bot.send_message(chat_id=update.message.chat_id, text=response, parse_mode='HTML')
         response = ""
