@@ -124,8 +124,7 @@ def shipper_search(bot, update, user_data):
     while row:
         suitable = True
         for shipper in list(shippers.values()):
-            if (shipper.initiator.telegram_id == update.message.from_user.id and shipper.shippered.telegram_id == row[5]) or \
-                    (shipper.shippered.telegram_id == row[5] and shipper.shippered.telegram_id == update.message.from_user.id):
+            if shipper.initiator.telegram_id == update.message.from_user.id and shipper.shippered.telegram_id == row[5]:
                 row = cursor.fetchone()
                 suitable = False
                 break
