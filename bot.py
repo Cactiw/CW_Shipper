@@ -8,11 +8,11 @@ from libs.start_pult import rebuild_pult
 from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
-from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers
+from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers, shipper_mute
 from bin.profile import profile, shipper_history
 
 from work_materials.filters.service_filters import filter_is_admin
-from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class
+from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class, filter_mute_shipper
 from work_materials.filters.shadow_letter_filters import filter_shadow_letter, filter_awaiting_shadow_letter, filter_confirm_shadow_letter, filter_cancel_shadow_letter
 
 import traceback, logging, datetime, threading
@@ -51,6 +51,9 @@ def inline_callback(bot, update, user_data):
         pult_callback(bot, update, user_data)
         return
 
+def unknown_message(bot, update):
+    bot.send_message(chat_id = update.message.chat_id, text = "Некорректный ввод, попробуйте повторить /shipper")
+
 
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
@@ -66,7 +69,9 @@ dispatcher.add_handler(MessageHandler(Filters.command & filter_shadow_letter, sh
 dispatcher.add_handler(MessageHandler(Filters.text & filter_awaiting_shadow_letter, shadow_letter_confirm, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.command & filter_confirm_shadow_letter, shadow_letter_send, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.command & filter_cancel_shadow_letter, shadow_letter_cancel, pass_user_data=True))
+dispatcher.add_handler(MessageHandler(Filters.command & filter_mute_shipper, shipper_mute, pass_user_data=True))
 
+dispatcher.add_handler(MessageHandler(Filters.all, unknown_message))
 
 dispatcher.add_handler(CallbackQueryHandler(inline_callback, pass_update_queue=False, pass_user_data=True))
 

@@ -3,7 +3,7 @@ from telegram.error import BadRequest, Unauthorized, TelegramError
 from work_materials.globals import castles, build_menu, classes_list, cursor, moscow_tz, admin_ids
 from libs.shipper_store import Shipper
 
-import datetime, logging
+import datetime, logging, traceback
 
 shippers = {}
 
@@ -16,13 +16,13 @@ def fill_shippers():
     request = "select shipper_id, time_shippered, player.telegram_id, " \
         "player.telegram_username username, player.castle castle, player.game_class game_class, " \
         "shippered.telegram_id as shippered_telegram_id, shippered.telegram_username as shippered_telegram_username, " \
-        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class from shippers " \
+        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class, muted from shippers " \
         "inner join players player ON initiator_player_id = player.player_id " \
         "inner join players shippered on shippered_player_id = shippered.player_id"
     cursor.execute(request)
     row = cursor.fetchone()
     while row:
-        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1])
+        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1], row[10])
         print(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1])
         shippers.update({row[0]: current})
         row = cursor.fetchone()
@@ -180,8 +180,13 @@ def shadow_letter_send(bot, update, user_data):
     mes = update.message
     text = user_data.get("shadow_letter_text")
     shipper = user_data.get("shipper_to_send")
+    if shipper.muted:
+        bot.send_message(chat_id=mes.chat_id, text="Этот человек отключил сообщения от вас. Возможно, когда-нибудь, он включит их обратно.")
+        return
     try:
-        bot.send_message(chat_id = shipper.shippered.telegram_id, text = "Кто-то послал вам тайное послание:\n{0}".format(text))
+        bot.send_message(chat_id = shipper.shippered.telegram_id,
+                         text = "Кто-то послал вам тайное послание:\n{0}\n\n "
+                                "Вы можете отключить сообщения от этого человека: /mute_shipper_{1}".format(text, shipper.shipper_id))
     except (Unauthorized, BadRequest):
         bot.send_message(chat_id = mes.chat_id, text = "Невозможно доставить сообщение, возможно, получатель заблокировал бота. Напишите ему сами, не бегите от своего счастья!")
         return
@@ -193,6 +198,28 @@ def shadow_letter_send(bot, update, user_data):
     user_data.pop("shipper_to_send")
     user_data.pop("shadow_letter_text")
     return
+
+
+def shipper_mute(bot, update, user_data):
+    mes = update.message
+    try:
+        shipper_id = int(mes.text.split('_')[2].partition("@")[0])
+    except Exception:
+        logging.error(traceback.format_exc())
+        bot.send_message(chat_id = mes.chat_id, text = "Произошла ошибка. Проверьте синтаксис.")
+        return
+    shipper = shippers.get(shipper_id)
+    if shipper is None or shipper.shippered.telegram_id != mes.from_user.id:
+        bot.send_message(chat_id=mes.chat_id, text="Не найдено. Правильный номер поиска?")
+        return
+    if shipper.muted:
+        bot.send_message(chat_id=mes.chat_id, text="Уже и так отключено.")
+        return
+    shipper.muted = True
+    request = "update shippers set muted = TRUE where shipper_id = %s"
+    cursor.execute(request, (shipper.shipper_id,))
+    bot.send_message(chat_id = mes.chat_id, text = "Готово! Этот человек вас больше не побеспокоит")
+
 
 def shadow_letter_cancel(bot, update, user_data):
     pop_list = ["status", "shipper_to_send", "shadow_letter_text"]

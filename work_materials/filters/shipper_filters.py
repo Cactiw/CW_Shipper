@@ -1,6 +1,7 @@
 from telegram.ext import BaseFilter
 from work_materials.globals import castles, classes_list, dispatcher
 
+
 class FilterShipperCastle(BaseFilter):
     def filter(self, message):
         try:
@@ -10,6 +11,7 @@ class FilterShipperCastle(BaseFilter):
 
 filter_shipper_castle= FilterShipperCastle()
 
+
 class FilterShipperClass(BaseFilter):
     def filter(self, message):
         try:
@@ -18,3 +20,10 @@ class FilterShipperClass(BaseFilter):
             return False
 
 filter_shipper_class= FilterShipperClass()
+
+
+class FilterMuteShipper(BaseFilter):
+    def filter(self, message):
+        return message.text.find("/mute_shipper_") == 0
+
+filter_mute_shipper = FilterMuteShipper()
