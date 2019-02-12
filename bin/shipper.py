@@ -101,12 +101,20 @@ def shipper_search(bot, update, user_data):
         not_found = True
         if search_castle != -1 and search_class != -1:
             request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where " \
-                      "telegram_id != %s and (castle = %s or game_class = %s) order by times_shippered"
+                      "telegram_id != %s and (castle = %s or game_class = %s)"
+            if random.randint(0, 1):
+                request += "order by times_shippered, last_shippered"
+            else:
+                request += "order by last_shippered, times_shippered"
             cursor.execute(request, (update.message.from_user.id, search_castle, search_class))
             row = cursor.fetchone()
         if row is None:
             request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where " \
-                      "telegram_id != %s order by times_shippered"
+                      "telegram_id != %s"
+            if random.randint(0, 1):
+                request += "order by times_shippered, last_shippered"
+            else:
+                request += "order by last_shippered, times_shippered"
             cursor.execute(request, (update.message.from_user.id,))
             row = cursor.fetchone()
         if row is None:
