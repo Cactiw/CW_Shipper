@@ -161,11 +161,9 @@ def shipper_search(bot, update, user_data):
     current = Shipper(row_temp[0], update.message.from_user.id, update.message.from_user.username, player_castle, player_game_class, row[5], row[0], row[3], row[4], now, force=force)
     shippers.update({row_temp[0] : current})
     if not not_found:
-        response = "Смотри, кого мы нашли! <b>{3}</b> <b>{4}</b>\n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
-            "Написать тайно: /shadow_letter_{2} (чтобы написать повторно)".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
+        response = "Смотри, кого мы нашли! <b>{2}</b> <b>{3}</b>\n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
     else:
-        response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{3}</b> <b>{4}</b> \n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
-            "Написать тайно: /shadow_letter_{2} (чтобы написать повторно)".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
+        response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{2}</b> <b>{3}</b> \n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
     bot.send_message(chat_id = update.message.chat_id, text = response, parse_mode = 'HTML', reply_markup = ReplyKeyboardRemove())
     user_data.update({"last_shipper_time" : now})
     shadow_letter(bot, update, user_data, shipper_id=row_temp[0])
@@ -231,11 +229,24 @@ def shadow_letter_send(bot, update, user_data):
     row_temp = cursor.fetchone()
     current_message = Message(row_temp[0], shipper.shipper_id, now)
     shipper_messages_sent.update({row_temp[0] : current_message})
-    bot.send_message(chat_id = mes.chat_id, text = "Сообщение успешно доставлено! Возможно, вам стоит написать самим, уже не таясь?")
+    bot.send_message(chat_id = mes.chat_id, text = "Сообщение успешно доставлено! Возможно, вам стоит написать самим, уже не таясь?\n"
+                                                   "Так же можно написать повторно: /shadow_letter_{0}".format(shipper.shipper_id))
     user_data.pop("status")
     user_data.pop("shipper_to_send")
     user_data.pop("shadow_letter_text")
     return
+
+
+def shadow_letter_cancel(bot, update, user_data):
+    shipper = user_data.get("shipper_to_send")
+    pop_list = ["status", "shipper_to_send", "shadow_letter_text"]
+    user_data_list = list(user_data)
+    for item in pop_list:
+        if item in user_data_list:
+            user_data.pop(item)
+    bot.send_message(chat_id = update.message.chat_id,
+                     text = "Успешно отменено!\nВы можете написать ещё раз: /shadow_letter_{0}".format(shipper.shipper_id))
+
 
 def reply_to_message(bot, update, user_data):
     mes = update.message
@@ -364,14 +375,5 @@ def shipper_unmute(bot, update, user_data):
     request = "update shippers set muted = FALSE where shipper_id = %s"
     cursor.execute(request, (shipper.shipper_id,))
     bot.send_message(chat_id=mes.chat_id, text="Готово! Вы снова можете получать сообщения от этого человека")
-
-
-def shadow_letter_cancel(bot, update, user_data):
-    pop_list = ["status", "shipper_to_send", "shadow_letter_text"]
-    user_data_list = list(user_data)
-    for item in pop_list:
-        if item in user_data_list:
-            user_data.pop(item)
-    bot.send_message(chat_id = update.message.chat_id, text = "Успешно отменено!")
 
 
