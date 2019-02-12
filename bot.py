@@ -9,7 +9,7 @@ from bin.save_load_user_data import loadData, saveData
 
 from bin.pult_callback import pult_callback
 from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers
-from bin.profile import profile
+from bin.profile import profile, shipper_history
 
 from work_materials.filters.service_filters import filter_is_admin
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class
@@ -54,6 +54,7 @@ def inline_callback(bot, update, user_data):
 
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('shipper_history', shipper_history, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
