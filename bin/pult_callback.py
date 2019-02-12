@@ -1,7 +1,7 @@
 from telegram.error import BadRequest, TelegramError, Unauthorized
-import logging, traceback
+import logging, traceback, datetime
 
-from work_materials.globals import castles as castles_const, classes_list as classes_const, cursor
+from work_materials.globals import castles as castles_const, classes_list as classes_const, cursor, moscow_tz
 from libs.start_pult import rebuild_pult
 from bin.shipper import shipper
 
@@ -80,9 +80,14 @@ def pult_ok_callback(bot, update, user_data):
     user_data.update({"player_id" : row[0], "castle" : castle, "game_class" : game_class})
     print(user_data)
     bot.send_message(chat_id = mes.chat_id,
-                     text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>'.format(game_class, castle, castle_print),
+                     text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>\nВ случае ошибки вы можете удалить данные '
+                            'до первого использования /shipper:  /delete_self'.format(game_class, castle, castle_print),
                      parse_mode = 'HTML')
-    shipper(bot, update.callback_query.from_user.id, user_data)
+    if datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) >= datetime.datetime(year=2019, month=2, day=14):
+        shipper(bot, update.callback_query.from_user.id, user_data)
+    else:
+        bot.send_message(chat_id = mes.chat_id,
+                         text = "Спасибо за регистрацию! До 14 февраля остальные функции отключены. Наберитесь терпения!")
 
 
 def edit_pult(bot, chat_id, message_id, reply_markup, callback_query_id):

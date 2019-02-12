@@ -28,6 +28,8 @@ filter_confirm_shadow_letter= FilterShadowLetterConfirm()
 class FilterShadowLetterCancel(BaseFilter):
     def filter(self, message):
         user_data = dispatcher.user_data.get(message.from_user.id)
-        return message.text == "/cancel_shadow_letter" and user_data and user_data.get("status") == "awaiting_letter_confirmation"
+        return message.text == "/cancel_shadow_letter" and user_data and \
+               (user_data.get("status") == "awaiting_letter_confirmation"
+                or user_data.get("status") == "awaiting_shadow_letter")
 
 filter_cancel_shadow_letter= FilterShadowLetterCancel()

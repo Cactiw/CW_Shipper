@@ -12,7 +12,7 @@ from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class
     shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers, shipper_mute, shipper_unmute
 from bin.profile import profile, shipper_history
 
-from work_materials.filters.service_filters import filter_is_admin
+from work_materials.filters.service_filters import filter_is_admin, filter_only_registration, filter_delete_yourself
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class, filter_mute_shipper, filter_unmute_shipper
 from work_materials.filters.shadow_letter_filters import filter_shadow_letter, filter_awaiting_shadow_letter, filter_confirm_shadow_letter, filter_cancel_shadow_letter
 
@@ -52,6 +52,11 @@ def inline_callback(bot, update, user_data):
         pult_callback(bot, update, user_data)
         return
 
+
+def only_registration(bot, update):
+    bot.send_message(chat_id = update.message.chat_id, text = "До 14 февраля доступна только регистрация! Наберитесь терпения!\nВы можете использовать /profile для проверки регистрации")
+
+
 def unknown_message(bot, update):
     bot.send_message(chat_id = update.message.chat_id, text = "Некорректный ввод, попробуйте повторить /shipper")
 
@@ -60,9 +65,12 @@ dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_history', shipper_history, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_delete_yourself, pass_user_data=True))
 
-dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
+
+dispatcher.add_handler(MessageHandler(filter_only_registration, only_registration))
+dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_selected_castle, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_class, shipper_selected_class, pass_user_data=True))
 

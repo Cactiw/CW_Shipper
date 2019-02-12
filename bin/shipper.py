@@ -1,6 +1,6 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.error import BadRequest, Unauthorized, TelegramError
-from work_materials.globals import castles, build_menu, classes_list, cursor, moscow_tz, admin_ids
+from work_materials.globals import castles, build_menu, classes_list, cursor, moscow_tz, admin_ids, castles_to_string
 from libs.shipper_store import Shipper
 
 import datetime, logging, traceback
@@ -16,13 +16,13 @@ def fill_shippers():
     request = "select shipper_id, time_shippered, player.telegram_id, " \
         "player.telegram_username username, player.castle castle, player.game_class game_class, " \
         "shippered.telegram_id as shippered_telegram_id, shippered.telegram_username as shippered_telegram_username, " \
-        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class, muted from shippers " \
+        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class, muted, force from shippers " \
         "inner join players player ON initiator_player_id = player.player_id " \
         "inner join players shippered on shippered_player_id = shippered.player_id"
     cursor.execute(request)
     row = cursor.fetchone()
     while row:
-        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1], row[10])
+        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1], muted = row[10], force = row[11])
         print(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1])
         shippers.update({row[0]: current})
         row = cursor.fetchone()
@@ -33,7 +33,8 @@ def shipper_force(bot, update, user_data):
     shipper(bot, update, user_data, force=True)
 
 
-def shipper(bot, update, user_data, force = False):
+def shipper(bot, update, user_data, force=False):
+    user_data.update({"shipper_force": force})
     if isinstance(update, int):
         chat_id = update
     else:
@@ -82,7 +83,6 @@ def shipper_search(bot, update, user_data):
     player_castle = user_data.get("castle")
     player_game_class = user_data.get("game_class")
     player_id = user_data.get("player_id")
-    print(search_class)
     request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where telegram_id != %s "
     request += ("and castle = %s " if search_castle != -1 else "") + ("and game_class = %s " if search_class != -1 else "")
     request += "order by times_shippered"
@@ -91,7 +91,6 @@ def shipper_search(bot, update, user_data):
         args.append(search_castle)
     if search_class != -1:
         args.append(search_class)
-    print(request, args)
     cursor.execute(request, tuple(args))
     row = cursor.fetchone()
     not_found = False
@@ -126,21 +125,24 @@ def shipper_search(bot, update, user_data):
         not_found = True
     times_shippered = row[1] + 1
     now = datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None)
-    request = "update players set times_shippered = %s, last_shippered = %s where player_id = %s"
-    cursor.execute(request, (times_shippered, now, row[2]))
-    request = "insert into shippers(initiator_player_id, shippered_player_id, time_shippered) VALUES (%s, %s, %s) returning shipper_id"
-    cursor.execute(request, (player_id, row[2], now))
+    force = user_data.get("shipper_force")
+    if force is None:
+        force = False
+    if not force:
+        request = "update players set times_shippered = %s, last_shippered = %s where player_id = %s"
+        cursor.execute(request, (times_shippered, now, row[2]))
+    request = "insert into shippers(initiator_player_id, shippered_player_id, time_shippered, force) VALUES (%s, %s, %s, %s) returning shipper_id"
+    cursor.execute(request, (player_id, row[2], now, force))
     row_temp = cursor.fetchone()
-    current = Shipper(row_temp[0], update.message.from_user.id, update.message.from_user.username, player_castle, player_game_class, row[5], row[0], row[3], row[4], now)
+    current = Shipper(row_temp[0], update.message.from_user.id, update.message.from_user.username, player_castle, player_game_class, row[5], row[0], row[3], row[4], now, force=force)
     shippers.update({row_temp[0] : current})
     if not not_found:
-        response = "Смотри, кого мы нашли! @{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
-            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0])
+        response = "Смотри, кого мы нашли! <b>{3}</b> <b>{4}</b>\n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
+            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
     else:
-        response = "Любовь найти трудно, наиболее близким к запросу оказался @{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
-            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0])
-    bot.send_message(chat_id = update.message.chat_id,
-                     text = response)
+        response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{3}</b> <b>{4}</b> \n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
+            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
+    bot.send_message(chat_id = update.message.chat_id, text = response, parse_mode = 'HTML', reply_markup = ReplyKeyboardRemove())
     user_data.update({"last_shipper_time" : now})
 
 
