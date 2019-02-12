@@ -162,21 +162,23 @@ def shipper_search(bot, update, user_data):
     shippers.update({row_temp[0] : current})
     if not not_found:
         response = "Смотри, кого мы нашли! <b>{3}</b> <b>{4}</b>\n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
-            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
+            "Написать тайно: /shadow_letter_{2} (чтобы написать повторно)".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
     else:
         response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{3}</b> <b>{4}</b> \n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n"\
-            "Написать тайно: /shadow_letter_{2}".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
+            "Написать тайно: /shadow_letter_{2} (чтобы написать повторно)".format(row[0], HOURS_BETWEEN_SHIPPER, row_temp[0], row[4], row[3] + castles_to_string.get(row[3]))
     bot.send_message(chat_id = update.message.chat_id, text = response, parse_mode = 'HTML', reply_markup = ReplyKeyboardRemove())
     user_data.update({"last_shipper_time" : now})
+    shadow_letter(bot, update, user_data, shipper_id=row_temp[0])
 
 
-def shadow_letter(bot, update, user_data):
+def shadow_letter(bot, update, user_data, shipper_id = None):
     mes = update.message
-    try:
-        shipper_id = int(mes.text.partition("@")[0].split("_")[2])
-    except ValueError:
-        bot.send_message(chat_id = mes.chat_id, text = "Проверьте синтаксис и попробуйте ещё раз")
-        return
+    if shipper_id is None:
+        try:
+            shipper_id = int(mes.text.partition("@")[0].split("_")[2])
+        except ValueError:
+            bot.send_message(chat_id = mes.chat_id, text = "Проверьте синтаксис и попробуйте ещё раз")
+            return
     shipper = shippers.get(shipper_id)
     if shipper is None:
         bot.send_message(chat_id=mes.chat_id, text="Не найдено. Попробуйте ещё раз")
@@ -187,7 +189,7 @@ def shadow_letter(bot, update, user_data):
         return
     user_data.update({"status": "awaiting_shadow_letter", "shipper_to_send" : shipper})
     bot.send_message(chat_id = mes.chat_id,
-                     text = "Текст, который вы напишете далее будет анонимно отправлен @{0}. "
+                     text = "Текст, который вы напишете далее будет анонимно отправлен @{0}.\n"
                             "Используйте /cancel_shadow_letter для отмены.".format(shipper.shippered.telegram_username))
 
 
@@ -262,8 +264,8 @@ def reply_to_message(bot, update, user_data):
         return
     user_data.update({"status": "awaiting_reply", "reply_to_send": shipper, "message_to_reply": message_to_reply})
     bot.send_message(chat_id=mes.chat_id,
-                     text="Текст, который вы напишете далее будет отправлен обратно (уже не анонимно). "
-                          "Используйте /cancel_reply для отмены.")
+                     text="Текст, который вы напишете далее будет отправлен обратно (уже не анонимно)."
+                          "\nИспользуйте /cancel_reply для отмены.")
 
 
 def reply_confirm(bot, update, user_data):
@@ -301,7 +303,7 @@ def reply_send(bot, update, user_data):
         return
     try:
         bot.send_message(chat_id=shipper.initiator.telegram_id,
-                         text="@{1} ответил вам на ваше сообщение:\n{0}\n\n".format(text, shipper.shippered.telegram_username))
+                         text="@{1} ответил вам на ваше сообщение:\n{0}\n\nВы всегда можете снова написать ему!: /shadow_letter_{2}".format(text, shipper.shippered.telegram_username, shipper.shipper_id))
     except (Unauthorized, BadRequest):
         bot.send_message(chat_id=mes.chat_id,
                          text="Невозможно доставить сообщение, возможно, получатель заблокировал бота. Грустно, если вы так и не узнали, кто это был(")
