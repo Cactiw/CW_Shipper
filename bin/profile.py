@@ -23,6 +23,7 @@ def shipper_history(bot, update, user_data):
     response = "История поиска:\n"
     shippers_list = list(shippers.values())
     i = 0
+    new_response = ""
     for shipper in shippers_list:
         i += 1
         if shipper.initiator.telegram_id == update.message.from_user.id:
