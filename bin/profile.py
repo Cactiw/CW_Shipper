@@ -7,7 +7,7 @@ MESSAGE_LENGTH_LIMIT = 4096
 def profile(bot, update, user_data):
     mes = update.message
     request = "select telegram_username, times_shippered, player_id, castle, game_class, " \
-              "telegram_id, last_time_shipper_used from players where telegram_id = %s"
+              "telegram_id, last_time_shipper_used, shipper_enabled from players where telegram_id = %s"
     cursor.execute(request, (mes.from_user.id,))
     row = cursor.fetchone()
     if row is None:
@@ -17,7 +17,10 @@ def profile(bot, update, user_data):
     response = "<b>{0}</b> --- <b>{1}</b> <b>{2}</b>\n".format(row[0], row[4], row[3] + castles_to_string.get(row[3]))
     response += ("Последний поиск: {0}".format(last_time_shipper_used.strftime("%d/%m/%Y :: %H:%M")) if last_time_shipper_used else "") + "\n\n"
     response += "История поиска: /shipper_history\n"
-    response += "Вы так же можете отключить участие в поиске: /disable_shipper"
+    if row[7]:
+        response += "Вы так же можете отключить участие в поиске: /disable_shipper"
+    else:
+        response += "Вы можете включить участие в поиске обратно: /enable_shipper"
     bot.send_message(chat_id = mes.chat_id, text = response, parse_mode = 'HTML')
 
 
