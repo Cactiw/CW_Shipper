@@ -13,7 +13,7 @@ filter_is_admin = FilterIsAdmin()
 class FilterDeleteYourself(BaseFilter):
     def filter(self, message):
         user_data = dispatcher.user_data.get(message.from_user.id)
-        return user_data and user_data.get("last_shipper_time")
+        return user_data is None or user_data.get("last_shipper_time") is None
 
 filter_delete_yourself = FilterDeleteYourself()
 

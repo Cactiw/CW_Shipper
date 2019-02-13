@@ -3,7 +3,6 @@ from work_materials.globals import dispatcher
 
 class FilterShadowLetter(BaseFilter):
     def filter(self, message):
-        print(message.text.find("/shadow_letter_"))
         return message.text.find("/shadow_letter_") == 0
 
 filter_shadow_letter= FilterShadowLetter()

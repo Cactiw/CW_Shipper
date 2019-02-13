@@ -8,7 +8,7 @@ import datetime, logging, traceback, random
 shippers = {}
 shipper_messages_sent = {}
 
-HOURS_BETWEEN_SHIPPER = 4
+HOURS_BETWEEN_SHIPPER = 1
 
 
 def fill_shippers():
@@ -54,14 +54,13 @@ def shipper(bot, update, user_data, force=False):
     else:
         chat_id = update.message.chat_id
     last_shipper_time = user_data.get("last_shipper_time")
-    print(not force, last_shipper_time is not None, last_shipper_time)#, datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time, datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER))
-    """if not force and last_shipper_time is not None and \
+    if not force and last_shipper_time is not None and \
             datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER):
-        response = "Время ещё не пришло. Должно пройти {0} часа после предыдущей попытки.".format(HOURS_BETWEEN_SHIPPER)
+        response = "Время ещё не пришло. Должнен пройти {0} час после предыдущей попытки.".format(HOURS_BETWEEN_SHIPPER)
         if chat_id in admin_ids:
             response += "\nВы можете пропустить ожидание: /shipper_force"
         bot.send_message(chat_id=chat_id, text=response)
-        return"""   #TODO вернуть
+        return
     __castle_buttons = []
     for castle in castles:
         __castle_buttons.append(KeyboardButton(castle))
@@ -161,9 +160,9 @@ def shipper_search(bot, update, user_data):
     current = Shipper(row_temp[0], update.message.from_user.id, update.message.from_user.username, player_castle, player_game_class, row[5], row[0], row[3], row[4], now, force=force)
     shippers.update({row_temp[0] : current})
     if not not_found:
-        response = "Смотри, кого мы нашли! <b>{2}</b> <b>{3}</b>\n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
+        response = "Смотри, кого мы нашли! <b>{2}</b> <b>{3}</b>\n@{0}\nПовторить попытку можно будет через {1} час: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
     else:
-        response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{2}</b> <b>{3}</b> \n@{0}\nПовторить попытку можно будет через {1} часа: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
+        response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{2}</b> <b>{3}</b> \n@{0}\nПовторить попытку можно будет через {1} час: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
     bot.send_message(chat_id = update.message.chat_id, text = response, parse_mode = 'HTML', reply_markup = ReplyKeyboardRemove())
     user_data.update({"last_shipper_time" : now})
     shadow_letter(bot, update, user_data, shipper_id=row_temp[0])
