@@ -56,7 +56,8 @@ def shipper(bot, update, user_data, force=False):
     last_shipper_time = user_data.get("last_shipper_time")
     if not force and last_shipper_time is not None and \
             datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER):
-        response = "Время ещё не пришло. Должнен пройти {0} час после предыдущей попытки.".format(HOURS_BETWEEN_SHIPPER)
+        response = "Время ещё не пришло. Должнен пройти {0} час после предыдущей попытки.\n" \
+                   "Осталось: {1}".format(HOURS_BETWEEN_SHIPPER, ":".join(str(datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER) -(datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time)).partition(".")[0].split(":")[1:3]))
         if chat_id in admin_ids:
             response += "\nВы можете пропустить ожидание: /shipper_force"
         bot.send_message(chat_id=chat_id, text=response)
@@ -96,7 +97,7 @@ def shipper_search(bot, update, user_data):
     player_castle = user_data.get("castle")
     player_game_class = user_data.get("game_class")
     player_id = user_data.get("player_id")
-    request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where telegram_id != %s "
+    request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where telegram_id != %s and shipper_enabled = TRUE "
     request += ("and castle = %s " if search_castle != -1 else "") + ("and game_class = %s " if search_class != -1 else "")
     if random.randint(0, 1):
         request += "order by times_shippered, last_shippered"
@@ -114,7 +115,7 @@ def shipper_search(bot, update, user_data):
         not_found = True
         if search_castle != -1 and search_class != -1:
             request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where " \
-                      "telegram_id != %s and (castle = %s or game_class = %s)"
+                      "telegram_id != %s and (castle = %s or game_class = %s) and shipper_enabled = TRUE "
             if random.randint(0, 1):
                 request += "order by times_shippered, last_shippered"
             else:
@@ -123,7 +124,7 @@ def shipper_search(bot, update, user_data):
             row = cursor.fetchone()
         if row is None:
             request = "select telegram_username, times_shippered, player_id, castle, game_class, telegram_id from players where " \
-                      "telegram_id != %s"
+                      "telegram_id != %s and shipper_enabled = TRUE "
             if random.randint(0, 1):
                 request += "order by times_shippered, last_shippered"
             else:

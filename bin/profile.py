@@ -3,6 +3,7 @@ from bin.shipper import shippers
 
 MESSAGE_LENGTH_LIMIT = 4096
 
+
 def profile(bot, update, user_data):
     mes = update.message
     request = "select telegram_username, times_shippered, player_id, castle, game_class, " \
@@ -15,7 +16,8 @@ def profile(bot, update, user_data):
     last_time_shipper_used = user_data.get("last_shipper_time")
     response = "<b>{0}</b> --- <b>{1}</b> <b>{2}</b>\n".format(row[0], row[4], row[3] + castles_to_string.get(row[3]))
     response += ("Последний поиск: {0}".format(last_time_shipper_used.strftime("%d/%m/%Y :: %H:%M")) if last_time_shipper_used else "") + "\n\n"
-    response += "История поиска: /shipper_history"
+    response += "История поиска: /shipper_history\n"
+    response += "Вы так же можете отключить участие в поиске: /disable_shipper"
     bot.send_message(chat_id = mes.chat_id, text = response, parse_mode = 'HTML')
 
 

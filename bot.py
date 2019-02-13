@@ -54,7 +54,8 @@ def help(bot, update):
     response = "Данный бот предназначен для помощи игрокам чв в нахождении вторых половинок и приурочен к 14 февраля.\nСписок доступных команд:\n"
     response += "/start - Регистрация в боте, всё очевидно.\n/shipper - Начать процесс поиска, можно использовать 1 раз в час\n"
     response += "/delete_self - Удаление регистрации, можно использовать до первого успешного /shipper\n"
-    response += "/profile - Отображение основной информации.\n/shipper_history - Отображение истории поиска\n"
+    response += "/profile - Отображение основной информации.\n/shipper_history - Отображение истории поиска (последние 10 результатов, для отображения полной - /shipper_history_full)\n"
+    response += "/disable_shipper - Отключить участие в шиппере\n"
     response += "Так же доступны некоторые другие команды, подсказки будут возникать по ходу использования.\n\n"
     if update.message.from_user.id in admin_ids:
         response += "<b>Admin features:</b>\n"
@@ -80,12 +81,29 @@ def unknown_message(bot, update):
     bot.send_message(chat_id = update.message.chat_id, text = "Некорректный ввод, попробуйте повторить /shipper")
 
 
+def disable_shipper(bot, update):
+    request = "update players set shipper_enabled = FALSE where telegram_id = %s"
+    cursor.execute(request, (update.message.from_user.id,))
+    bot.send_message(chat_id = update.message.chat_id,
+                     text = "Вы больше не участвуете в поиске пар :-(\n\n"
+                            "Если передумаете, нажмите /enable_shipper")
+
+
+def enable_shipper(bot, update):
+    request = "update players set shipper_enabled = TRUE where telegram_id = %s"
+    cursor.execute(request, (update.message.from_user.id,))
+    bot.send_message(chat_id = update.message.chat_id,
+                     text = "Вы снова участвуете в подборе!")
+
+
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_history_full', shipper_history, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_history', shipper_history_short, pass_user_data=True))
-dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('disable_shipper', disable_shipper, pass_user_data=False))
+dispatcher.add_handler(CommandHandler('enable_shipper', enable_shipper, pass_user_data=False))
+#dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))   # Отключил вообще, иначе каскадом уронит шипперы как свои, так и с собой
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_delete_yourself, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
