@@ -214,7 +214,7 @@ def shadow_letter_send(bot, update, user_data):
         return
     try:
         bot.send_message(chat_id = shipper.shippered.telegram_id,
-                         text = "Кто-то послал вам тайное послание:\n{0}\n\n"
+                         text = "Кто-то послал вам тайное сообщение:\n{0}\n\n"
                                 "Ответить (1 сообщение на каждое входящее): /reply_to_message_{1}\n"
                                 "Вы можете отключить сообщения от этого человека: /mute_shipper_{1}".format(text, shipper.shipper_id))
     except (Unauthorized, BadRequest):
