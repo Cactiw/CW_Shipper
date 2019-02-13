@@ -42,6 +42,10 @@ def start(bot, update, user_data):
     user_data.update({'castles' : castles_const.copy(), 'classes' : classes_const.copy(), 'start_pult_status' : pult_status})
     reply_markup = rebuild_pult("default", None, user_data)
     bot.send_message(chat_id = mes.chat_id, text = "Выберите свой замок и класс!", reply_markup = reply_markup)
+    if update.message.from_user.username is None:
+        bot.send_message(chat_id = update.message.chat_id,
+                         text = "У вас не установлено имя пользователя, поэтому часть функций бота будет для вас недоступна. Например, вас не смогут находить другие пользователи бота.\n" \
+       "Вы можете использовать /delete_self до первого поиска (если Вы уже прошли регистрацию), установить имя пользователя Telegram (откройте настройки Telegram -> username) и зарегистрироваться в боте заново (/start) для снятия ограничений.")
 
 
 def delete_self(bot, update, user_data):
