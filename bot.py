@@ -39,7 +39,7 @@ def start(bot, update, user_data):
     pult_status = {'castle' : -1, 'class' : -1}
     user_data.update({'castles' : castles_const.copy(), 'classes' : classes_const.copy(), 'start_pult_status' : pult_status})
     reply_markup = rebuild_pult("default", None, user_data)
-    bot.send_message(chat_id = mes.chat_id, text = "Выберите замок и класс!", reply_markup = reply_markup)
+    bot.send_message(chat_id = mes.chat_id, text = "Выберите свой замок и класс!", reply_markup = reply_markup)
 
 
 def delete_self(bot, update, user_data):
