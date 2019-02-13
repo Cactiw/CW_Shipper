@@ -61,13 +61,13 @@ def shipper(bot, update, user_data, force=False):
         if chat_id in admin_ids:
             response += "\nВы можете пропустить ожидание: /shipper_force"
         bot.send_message(chat_id=chat_id, text=response)
-        return
+        return       #   TODO: вернуть
     __castle_buttons = []
     for castle in castles:
         __castle_buttons.append(KeyboardButton(castle))
     reply_markup = ReplyKeyboardMarkup(build_menu(__castle_buttons, 4, footer_buttons=[KeyboardButton('Случайный замок')]), resize_keyboard=True)
     user_data.update({"status" : 'choosing castle'})
-    bot.send_message(chat_id = chat_id, text = "Чувствуете ли вы в каком замке живет ваша любовь?",
+    bot.send_message(chat_id = chat_id, text = "Чувствуете ли Вы в каком замке живет ваша любовь?",
                      reply_markup = reply_markup)
 
 
@@ -79,7 +79,7 @@ def shipper_selected_castle(bot, update, user_data):
     for curr_class in classes_list:
         __class_buttons.append(curr_class)
     reply_markup = ReplyKeyboardMarkup(build_menu(__class_buttons, 3, footer_buttons=[KeyboardButton('Случайный класс')]), resize_keyboard=True, one_time_keyboard=True)
-    bot.send_message(chat_id = mes.chat_id, text = "Знаете ли вы, кем является ваша любовь?",
+    bot.send_message(chat_id = mes.chat_id, text = "Знаете ли Вы, кем является ваша любовь?",
                      reply_markup = reply_markup)
 
 
@@ -161,7 +161,7 @@ def shipper_search(bot, update, user_data):
     current = Shipper(row_temp[0], update.message.from_user.id, update.message.from_user.username, player_castle, player_game_class, row[5], row[0], row[3], row[4], now, force=force)
     shippers.update({row_temp[0] : current})
     if not not_found:
-        response = "Смотри, кого мы нашли! <b>{2}</b> <b>{3}</b>\n@{0}\nПовторить попытку можно будет через {1} час: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
+        response = "Смотрите, кого мы нашли! <b>{2}</b> <b>{3}</b>\n@{0}\nПовторить попытку можно будет через {1} час: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
     else:
         response = "Любовь найти трудно, наиболее близким к запросу оказался <b>{2}</b> <b>{3}</b> \n@{0}\nПовторить попытку можно будет через {1} час: /shipper\n".format(row[0], HOURS_BETWEEN_SHIPPER, row[4], row[3] + castles_to_string.get(row[3]))
     bot.send_message(chat_id = update.message.chat_id, text = response, parse_mode = 'HTML', reply_markup = ReplyKeyboardRemove())
@@ -181,13 +181,13 @@ def shadow_letter(bot, update, user_data, shipper_id = None):
     if shipper is None:
         bot.send_message(chat_id=mes.chat_id, text="Не найдено. Попробуйте ещё раз")
         return
-    print(shipper.initiator.telegram_id, mes.from_user.id)
+    print("sending letter", shipper.initiator.telegram_id, mes.from_user.id)
     if shipper.initiator.telegram_id != mes.from_user.id:
         bot.send_message(chat_id=mes.chat_id, text="Не надо хитрить!")
         return
     user_data.update({"status": "awaiting_shadow_letter", "shipper_to_send" : shipper})
     bot.send_message(chat_id = mes.chat_id,
-                     text = "Текст, который вы напишете далее будет анонимно отправлен @{0}.\n"
+                     text = "Текст, который Вы напишете далее будет анонимно отправлен @{0}.\n"
                             "Используйте /cancel_shadow_letter для отмены.".format(shipper.shippered.telegram_username))
 
 
@@ -230,7 +230,7 @@ def shadow_letter_send(bot, update, user_data):
     current_message = Message(row_temp[0], shipper.shipper_id, now)
     shipper_messages_sent.update({row_temp[0] : current_message})
     bot.send_message(chat_id = mes.chat_id, text = "Сообщение успешно доставлено! Возможно, вам стоит написать самим, уже не таясь?\n"
-                                                   "Так же можно написать повторно: /shadow_letter_{0}".format(shipper.shipper_id))
+                                                   "Также можно написать повторно: /shadow_letter_{0}".format(shipper.shipper_id))
     user_data.pop("status")
     user_data.pop("shipper_to_send")
     user_data.pop("shadow_letter_text")
@@ -271,11 +271,11 @@ def reply_to_message(bot, update, user_data):
             message_exist = True
             break
     if not message_exist:
-        bot.send_message(chat_id=mes.chat_id, text="Не найдено, или вы уже ответили.")
+        bot.send_message(chat_id=mes.chat_id, text="Не найдено, или Вы уже ответили.")
         return
     user_data.update({"status": "awaiting_reply", "reply_to_send": shipper, "message_to_reply": message_to_reply})
     bot.send_message(chat_id=mes.chat_id,
-                     text="Текст, который вы напишете далее будет отправлен обратно (уже не анонимно)."
+                     text="Текст, который Вы напишете далее будет отправлен обратно (уже не анонимно)."
                           "\nИспользуйте /cancel_reply для отмены.")
 
 
@@ -317,7 +317,7 @@ def reply_send(bot, update, user_data):
                          text="@{1} ответил вам на ваше сообщение:\n{0}\n\nВы всегда можете снова написать ему!: /shadow_letter_{2}".format(text, shipper.shippered.telegram_username, shipper.shipper_id))
     except (Unauthorized, BadRequest):
         bot.send_message(chat_id=mes.chat_id,
-                         text="Невозможно доставить сообщение, возможно, получатель заблокировал бота. Грустно, если вы так и не узнали, кто это был(")
+                         text="Невозможно доставить сообщение, возможно, получатель заблокировал бота. Грустно, если Вы так и не узнали, кто это был(")
         return
     except TelegramError:
         bot.send_message(chat_id=mes.chat_id,

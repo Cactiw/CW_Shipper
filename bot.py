@@ -108,7 +108,7 @@ dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter
 
 dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
 
-dispatcher.add_handler(MessageHandler(filter_only_registration, only_registration))
+dispatcher.add_handler(MessageHandler(filter_only_registration, only_registration))    #   TODO: вернуть
 dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_castle, shipper_selected_castle, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text & filter_shipper_class, shipper_selected_class, pass_user_data=True))

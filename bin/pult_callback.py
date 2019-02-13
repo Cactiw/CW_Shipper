@@ -36,7 +36,6 @@ def pult_castles_callback(bot, update, user_data):
     new_markup = rebuild_pult("change_target", new_target, user_data)
     pult_status = user_data.get('start_pult_status')
     pult_status.update({ "castle" : new_target })
-    print(user_data.get('start_pult_status'))
     edit_pult(bot = bot, chat_id=mes.chat_id, message_id=mes.message_id, reply_markup=new_markup, callback_query_id=update.callback_query.id)
 
 def pult_classes_callback(bot, update, user_data):
@@ -45,7 +44,6 @@ def pult_classes_callback(bot, update, user_data):
     new_markup = rebuild_pult("change_class", new_class, user_data)
     pult_status = user_data.get('start_pult_status')
     pult_status.update({ "class" : new_class})
-    print(user_data.get('start_pult_status'))
     edit_pult(bot = bot, chat_id=mes.chat_id, message_id=mes.message_id, reply_markup=new_markup, callback_query_id=update.callback_query.id)
 
 def pult_ok_callback(bot, update, user_data):
@@ -78,10 +76,9 @@ def pult_ok_callback(bot, update, user_data):
     cursor.execute(request, (update.callback_query.from_user.id, update.callback_query.from_user.username, castle, game_class))
     row = cursor.fetchone()
     user_data.update({"player_id" : row[0], "castle" : castle, "game_class" : game_class})
-    print(user_data)
     bot.send_message(chat_id = mes.chat_id,
-                     text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>\nВ случае ошибки вы можете удалить данные '
-                            'до первого использования /shipper:  /delete_self'.format(game_class, castle, castle_print),
+                     text = 'Регистрация успешна, <b>{0}</b> <b>{1}{2}</b>\nЕсли Вы вдруг выбрали не свой класс и замок '
+                            '- можно пройти регистрацию заново. Доступно только до первого поиска второй половинки!  /delete_self'.format(game_class, castle, castle_print),
                      parse_mode = 'HTML')
     if datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) >= datetime.datetime(year=2019, month=2, day=14):
         shipper(bot, update.callback_query.from_user.id, user_data)
