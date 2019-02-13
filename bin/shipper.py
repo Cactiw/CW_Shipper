@@ -67,7 +67,7 @@ def shipper(bot, update, user_data, force=False):
         __castle_buttons.append(KeyboardButton(castle))
     reply_markup = ReplyKeyboardMarkup(build_menu(__castle_buttons, 4, footer_buttons=[KeyboardButton('Случайный замок')]), resize_keyboard=True)
     user_data.update({"status" : 'choosing castle'})
-    bot.send_message(chat_id = chat_id, text = "Чувствуете ли Вы в каком замке живет ваша любовь?",
+    bot.send_message(chat_id = chat_id, text = "Чувствуете ли Вы, в каком замке живет ваша любовь?",
                      reply_markup = reply_markup)
 
 
