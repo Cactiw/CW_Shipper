@@ -11,7 +11,7 @@ from bin.pult_callback import pult_callback
 from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class, shipper_force, shadow_letter, \
     shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers, shipper_mute, shipper_unmute, \
     reply_to_message, reply_confirm, reply_cancel, reply_send, fill_sent_messages
-from bin.profile import profile, shipper_history
+from bin.profile import profile, shipper_history, shipper_history_short
 
 from work_materials.filters.service_filters import filter_is_admin, filter_only_registration, filter_delete_yourself
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class, filter_mute_shipper, filter_unmute_shipper
@@ -83,7 +83,8 @@ def unknown_message(bot, update):
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
-dispatcher.add_handler(CommandHandler('shipper_history', shipper_history, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('shipper_history_full', shipper_history, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('shipper_history', shipper_history_short, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_is_admin, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_delete_yourself, pass_user_data=True))
 
