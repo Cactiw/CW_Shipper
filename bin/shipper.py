@@ -67,7 +67,7 @@ def shipper(bot, update, user_data, force=False):
         __castle_buttons.append(KeyboardButton(castle))
     reply_markup = ReplyKeyboardMarkup(build_menu(__castle_buttons, 4, footer_buttons=[KeyboardButton('Случайный замок')]), resize_keyboard=True)
     user_data.update({"status" : 'choosing castle'})
-    bot.send_message(chat_id = chat_id, text = "Чувствуешь ли ты в каком замке живет твоя любовь?",
+    bot.send_message(chat_id = chat_id, text = "Чувствуете ли вы в каком замке живет ваша любовь?",
                      reply_markup = reply_markup)
 
 
@@ -79,7 +79,7 @@ def shipper_selected_castle(bot, update, user_data):
     for curr_class in classes_list:
         __class_buttons.append(curr_class)
     reply_markup = ReplyKeyboardMarkup(build_menu(__class_buttons, 3, footer_buttons=[KeyboardButton('Случайный класс')]), resize_keyboard=True, one_time_keyboard=True)
-    bot.send_message(chat_id = mes.chat_id, text = "Знаешь ли ты, кем является твоя любовь?",
+    bot.send_message(chat_id = mes.chat_id, text = "Знаете ли вы, кем является ваша любовь?",
                      reply_markup = reply_markup)
 
 
