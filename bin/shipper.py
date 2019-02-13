@@ -56,7 +56,7 @@ def shipper(bot, update, user_data, force=False):
     last_shipper_time = user_data.get("last_shipper_time")
     if not force and last_shipper_time is not None and \
             datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time < datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER):
-        response = "Время ещё не пришло. Должнен пройти {0} час после предыдущей попытки.\n" \
+        response = "Время ещё не пришло. Должен пройти {0} час после предыдущей попытки.\n" \
                    "Осталось: {1}".format(HOURS_BETWEEN_SHIPPER, ":".join(str(datetime.timedelta(hours=HOURS_BETWEEN_SHIPPER) -(datetime.datetime.now(tz=moscow_tz).replace(tzinfo=None) - last_shipper_time)).partition(".")[0].split(":")[1:3]))
         if chat_id in admin_ids:
             response += "\nВы можете пропустить ожидание: /shipper_force"
