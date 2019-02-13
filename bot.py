@@ -12,6 +12,7 @@ from bin.shipper import shipper, shipper_selected_castle, shipper_selected_class
     shadow_letter_confirm, shadow_letter_send, shadow_letter_cancel, fill_shippers, shipper_mute, shipper_unmute, \
     reply_to_message, reply_confirm, reply_cancel, reply_send, fill_sent_messages
 from bin.profile import profile, shipper_history, shipper_history_short
+from bin.message_mass_send import mass_send_start
 
 from work_materials.filters.service_filters import filter_is_admin, filter_only_registration, filter_delete_yourself
 from work_materials.filters.shipper_filters import filter_shipper_castle, filter_shipper_class, filter_mute_shipper, filter_unmute_shipper
@@ -113,6 +114,7 @@ dispatcher.add_handler(CommandHandler('enable_shipper', enable_shipper, pass_use
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_delete_yourself, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('send_start_all', mass_send_start, filters=filter_is_admin, pass_user_data=False))
 
 dispatcher.add_handler(MessageHandler(filter_only_registration, only_registration))    #   TODO: вернуть
 dispatcher.add_handler(CommandHandler('shipper', shipper, pass_user_data=True))

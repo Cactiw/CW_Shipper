@@ -102,7 +102,7 @@ def shipper_search(bot, update, user_data):
     if random.randint(0, 1):
         request += "order by times_shippered, last_shippered"
     else:
-        request += "order by last_shippered, times_shippered"
+        request += "order by last_shippered desc, times_shippered"  #todo изменить
     args = [update.message.from_user.id]
     if search_castle != -1:
         args.append(search_castle)
@@ -119,7 +119,7 @@ def shipper_search(bot, update, user_data):
             if random.randint(0, 1):
                 request += "order by times_shippered, last_shippered"
             else:
-                request += "order by last_shippered, times_shippered"
+                request += "order by last_shippered desc, times_shippered"  #todo изменить
             cursor.execute(request, (update.message.from_user.id, search_castle, search_class))
             row = cursor.fetchone()
         if row is None:
@@ -128,7 +128,7 @@ def shipper_search(bot, update, user_data):
             if random.randint(0, 1):
                 request += "order by times_shippered, last_shippered"
             else:
-                request += "order by last_shippered, times_shippered"
+                request += "order by last_shippered desc, times_shippered"  #todo изменить
             cursor.execute(request, (update.message.from_user.id,))
             row = cursor.fetchone()
         if row is None:
