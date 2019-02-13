@@ -34,7 +34,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 def start(bot, update, user_data):
     mes = update.message
     if user_data.get('class') is not None:
-        bot.send_message(chat_id = mes.chat_id, text = "Вы уже зарегистрированы!")
+        bot.send_message(chat_id = mes.chat_id,
+                         text = "Вы уже зарегистрированы!\nИспользуйте /shipper, чтобы найти пару, "
+                                "или /profile, чтобы посмотреть профиль и историю поиска")
         return
     pult_status = {'castle' : -1, 'class' : -1}
     user_data.update({'castles' : castles_const.copy(), 'classes' : classes_const.copy(), 'start_pult_status' : pult_status})
