@@ -225,8 +225,10 @@ def shadow_letter_send(bot, update, user_data):
                 request = "update shippers set block_used = TRUE where shipper_id = %s"
                 cursor.execute(request, (shipper.shipper_id,))
                 user_data.pop("last_shipper_time")
+            except KeyError:
+                pass
             except Exception:
-                logging.error(traceback.format_exc())
+                logging.warning(traceback.format_exc())
                 pass
         return
     except TelegramError:
