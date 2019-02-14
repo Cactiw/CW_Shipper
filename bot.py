@@ -158,7 +158,7 @@ fill_shippers()
 fill_sent_messages()
 save_user_data = threading.Thread(target=saveData, name="Save User Data")
 save_user_data.start()
-updater.start_polling(clean=True)
+updater.start_polling(clean=False)
 
 # Останавливаем бота, если были нажаты Ctrl + C
 updater.idle()

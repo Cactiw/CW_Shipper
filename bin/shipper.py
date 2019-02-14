@@ -17,13 +17,13 @@ def fill_shippers():
     request = "select shipper_id, time_shippered, player.telegram_id, " \
         "player.telegram_username username, player.castle castle, player.game_class game_class, " \
         "shippered.telegram_id as shippered_telegram_id, shippered.telegram_username as shippered_telegram_username, " \
-        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class, muted, force from shippers " \
+        "shippered.castle as shippered_castle, shippered.game_class as shippered_game_class, muted, force, block_used from shippers " \
         "inner join players player ON initiator_player_id = player.player_id " \
         "inner join players shippered on shippered_player_id = shippered.player_id"
     cursor.execute(request)
     row = cursor.fetchone()
     while row:
-        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1], muted = row[10], force = row[11])
+        current = Shipper(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1], muted = row[10], force = row[11], block_used=row[12])
         print(row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[1])
         shippers.update({row[0]: current})
         row = cursor.fetchone()
@@ -218,12 +218,16 @@ def shadow_letter_send(bot, update, user_data):
                                 "Ответить (1 сообщение на каждое входящее): /reply_to_message_{1}\n"
                                 "Вы можете отключить сообщения от этого человека: /mute_shipper_{1}".format(text, shipper.shipper_id))
     except (Unauthorized, BadRequest):
-        bot.send_message(chat_id = mes.chat_id, text = "Невозможно доставить сообщение, возможно, получатель заблокировал бота. Напишите ему сами, не бегите от своего счастья!"
-                                                       "\nВы можете использовать /shipper ещё раз")
-        try:
-            user_data.pop("last_shipper_time")
-        except Exception:
-            pass
+        bot.send_message(chat_id = mes.chat_id, text = "Невозможно доставить сообщение, возможно, получатель заблокировал бота. Напишите ему сами, не бегите от своего счастья!" + ("\nВы можете использовать /shipper ещё раз" if not shipper.block_used else ""))
+        if not shipper.block_used:
+            try:
+                shipper.block_used = True
+                request = "update shippers set block_used = TRUE where shipper_id = %s"
+                cursor.execute(request, (shipper.shipper_id,))
+                user_data.pop("last_shipper_time")
+            except Exception:
+                logging.error(traceback.format_exc())
+                pass
         return
     except TelegramError:
         bot.send_message(chat_id = mes.chat_id, text = "Ошибка при отправке. Вы можете попробовать ещё раз, или написать сами!")
