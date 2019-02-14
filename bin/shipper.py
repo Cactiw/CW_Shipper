@@ -102,7 +102,7 @@ def shipper_search(bot, update, user_data):
     if random.randint(0, 1):
         request += "order by times_shippered, last_shippered"
     else:
-        request += "order by last_shippered desc, times_shippered"  #todo изменить
+        request += "order by last_shippered, times_shippered"  #todo изменить
     args = [update.message.from_user.id]
     if search_castle != -1:
         args.append(search_castle)
@@ -119,7 +119,7 @@ def shipper_search(bot, update, user_data):
             if random.randint(0, 1):
                 request += "order by times_shippered, last_shippered"
             else:
-                request += "order by last_shippered desc, times_shippered"  #todo изменить
+                request += "order by last_shippered, times_shippered"  #todo изменить
             cursor.execute(request, (update.message.from_user.id, search_castle, search_class))
             row = cursor.fetchone()
         if row is None:
@@ -128,7 +128,7 @@ def shipper_search(bot, update, user_data):
             if random.randint(0, 1):
                 request += "order by times_shippered, last_shippered"
             else:
-                request += "order by last_shippered desc, times_shippered"  #todo изменить
+                request += "order by last_shippered, times_shippered"  #todo изменить
             cursor.execute(request, (update.message.from_user.id,))
             row = cursor.fetchone()
         if row is None:
@@ -181,7 +181,7 @@ def shadow_letter(bot, update, user_data, shipper_id = None):
     if shipper is None:
         bot.send_message(chat_id=mes.chat_id, text="Не найдено. Попробуйте ещё раз")
         return
-    print("sending letter", shipper.initiator.telegram_id, mes.from_user.id)
+    print("preparing to send letter", shipper.initiator.telegram_id, mes.from_user.id)
     if shipper.initiator.telegram_id != mes.from_user.id:
         bot.send_message(chat_id=mes.chat_id, text="Не надо хитрить!")
         return
