@@ -103,6 +103,21 @@ def enable_shipper(bot, update):
                      text = "Вы снова участвуете в подборе!")
 
 
+def disable_waiting_time(bot, update):
+    mes = update.message
+    player_id = int(mes.text.partition(" ")[2])
+    user_data = dispatcher.user_data.get(player_id)
+    if user_data is None:
+        bot.send_message(chat_id = mes.chat_id, text = "Данных о пользователе не найдено!")
+        return
+    last_time_shipper_used = user_data.get("last_shipper_time")
+    if last_time_shipper_used is None:
+        bot.send_message(chat_id=mes.chat_id, text="Время последнего использования не найдено!")
+        return
+    user_data.pop("last_shipper_time")
+    bot.send_message(chat_id=mes.chat_id, text="Успешно")
+
+
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
@@ -114,6 +129,7 @@ dispatcher.add_handler(CommandHandler('enable_shipper', enable_shipper, pass_use
 dispatcher.add_handler(CommandHandler('delete_self', delete_self, filters=filter_delete_yourself, pass_user_data=True))
 
 dispatcher.add_handler(CommandHandler('shipper_force', shipper_force, filters=filter_is_admin, pass_user_data=True))
+dispatcher.add_handler(CommandHandler('disable_waiting_time', disable_waiting_time, filters=filter_is_admin, pass_user_data=False))
 dispatcher.add_handler(CommandHandler('send_start_all', mass_send_start, filters=filter_is_admin, pass_user_data=False))
 
 dispatcher.add_handler(MessageHandler(filter_only_registration, only_registration))    #   TODO: вернуть
@@ -142,7 +158,7 @@ fill_shippers()
 fill_sent_messages()
 save_user_data = threading.Thread(target=saveData, name="Save User Data")
 save_user_data.start()
-updater.start_polling(clean=False)
+updater.start_polling(clean=True)
 
 # Останавливаем бота, если были нажаты Ctrl + C
 updater.idle()
