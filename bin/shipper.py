@@ -218,7 +218,12 @@ def shadow_letter_send(bot, update, user_data):
                                 "Ответить (1 сообщение на каждое входящее): /reply_to_message_{1}\n"
                                 "Вы можете отключить сообщения от этого человека: /mute_shipper_{1}".format(text, shipper.shipper_id))
     except (Unauthorized, BadRequest):
-        bot.send_message(chat_id = mes.chat_id, text = "Невозможно доставить сообщение, возможно, получатель заблокировал бота. Напишите ему сами, не бегите от своего счастья!")
+        bot.send_message(chat_id = mes.chat_id, text = "Невозможно доставить сообщение, возможно, получатель заблокировал бота. Напишите ему сами, не бегите от своего счастья!"
+                                                       "\nВы можете использовать /shipper ещё раз")
+        try:
+            user_data.pop("last_shipper_time")
+        except Exception:
+            pass
         return
     except TelegramError:
         bot.send_message(chat_id = mes.chat_id, text = "Ошибка при отправке. Вы можете попробовать ещё раз, или написать сами!")
