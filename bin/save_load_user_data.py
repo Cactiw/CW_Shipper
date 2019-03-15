@@ -18,16 +18,16 @@ def loadData():
 
 def saveData():
     global processing
-    exit = 0
-    while exit == 0:
+    need_exit = 0
+    while need_exit == 0:
         for i in range(0, 5):
             time.sleep(5)
             if work_materials.globals.processing == 0:
-                    exit = 1
+                    need_exit = 1
                     break
         # Before pickling
         log.debug("Writing data, do not shutdown bot...\r")
-        if exit:
+        if need_exit:
             log.warning("Writing data last time, do not shutdown bot...")
 
         try:
@@ -35,5 +35,5 @@ def saveData():
             pickle.dump(work_materials.globals.dispatcher.user_data, f)
             f.close()
             log.debug("Data write completed\b")
-        except:
+        except Exception:
             logging.error(sys.exc_info()[0])

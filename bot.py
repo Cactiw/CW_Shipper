@@ -1,6 +1,6 @@
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, Filters
 
-from work_materials.globals import updater, dispatcher, job, castles as castles_const, classes_list as classes_const,\
+from work_materials.globals import updater, dispatcher, castles as castles_const, classes_list as classes_const,\
     conn, cursor, admin_ids
 import work_materials.globals as globals
 from libs.start_pult import rebuild_pult
@@ -20,7 +20,7 @@ from work_materials.filters.shadow_letter_filters import filter_shadow_letter, f
     filter_confirm_shadow_letter, filter_cancel_shadow_letter, filter_reply_to_message, filter_awaiting_reply, \
     filter_confirm_reply, filter_cancel_reply
 
-import traceback, logging, datetime, threading
+import logging, threading
 
 #   Выставляем логгироввание
 console = logging.StreamHandler()
@@ -57,7 +57,7 @@ def delete_self(bot, update, user_data):
     start(bot, update, user_data)
 
 
-def help(bot, update):
+def bot_help(bot, update):
     response = "Данный бот предназначен для помощи игрокам чв в нахождении вторых половинок и приурочен к 14 февраля.\nСписок доступных команд:\n"
     response += "/start - Регистрация в боте, всё очевидно.\n/shipper - Начать процесс поиска, можно использовать 1 раз в час\n"
     response += "/delete_self - Удаление регистрации, можно использовать до первого успешного /shipper\n"
@@ -119,7 +119,7 @@ def disable_waiting_time(bot, update):
 
 
 dispatcher.add_handler(CommandHandler('start', start, pass_user_data=True))
-dispatcher.add_handler(CommandHandler('help', help))
+dispatcher.add_handler(CommandHandler('help', bot_help))
 dispatcher.add_handler(CommandHandler('profile', profile, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_history_full', shipper_history, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('shipper_history', shipper_history_short, pass_user_data=True))

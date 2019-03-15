@@ -15,7 +15,7 @@ def mass_send(text):
         try:
             dispatcher.bot.send_message(chat_id=row[0], text = text)
         except Exception:
-            logging.warning("Error in sending message, telegram_id ={}\n{}", row[0], traceback.format_exc().splitlines()[-1])
+            logging.warning("Error in sending message, telegram_id ={}\n{}".format(row[0], traceback.format_exc().splitlines()[-1]))
         else:
             i += 1
             print("sent {} message, chat_id = {}".format(i, row[0]))

@@ -1,5 +1,5 @@
 from telegram import Bot
-from config import ProductionToken, request_kwargs
+from config import ProductionToken
 from work_materials.globals import admin_ids
 
 bot = Bot(token=ProductionToken)
