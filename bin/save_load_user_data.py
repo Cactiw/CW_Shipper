@@ -12,12 +12,11 @@ def loadData():
         print("Data picked up")
     except FileNotFoundError:
         logging.error("Data file not found")
-    except:
+    except Exception:
         logging.error(sys.exc_info()[0])
 
 
 def saveData():
-    global processing
     need_exit = 0
     while need_exit == 0:
         for i in range(0, 5):

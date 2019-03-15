@@ -230,7 +230,6 @@ def shadow_letter_send(bot, update, user_data):
             except Exception:
                 logging.warning(traceback.format_exc())
                 pass
-        return
     except TelegramError:
         bot.send_message(chat_id = mes.chat_id, text = "Ошибка при отправке. Вы можете попробовать ещё раз, или написать сами!")
         return
