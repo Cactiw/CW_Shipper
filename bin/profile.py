@@ -55,4 +55,3 @@ def shipper_history(bot, update, user_data, short = False):
 
 def shipper_history_short(bot, update, user_data):
     shipper_history(bot, update, user_data, short = True)
-    return

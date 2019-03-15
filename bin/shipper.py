@@ -229,7 +229,6 @@ def shadow_letter_send(bot, update, user_data):
                 pass
             except Exception:
                 logging.warning(traceback.format_exc())
-                pass
     except TelegramError:
         bot.send_message(chat_id = mes.chat_id, text = "Ошибка при отправке. Вы можете попробовать ещё раз, или написать сами!")
         return
@@ -276,7 +275,7 @@ def reply_to_message(bot, update, user_data):
     messages_list = list(shipper_messages_sent.values())
     message_to_reply = None
     for message in messages_list:
-        if message.shipper_id == shipper_id and message.answered == False:
+        if message.shipper_id == shipper_id and message.answered is False:
             message_to_reply = message
             message_exist = True
             break
@@ -385,5 +384,3 @@ def shipper_unmute(bot, update, user_data):
     request = "update shippers set muted = FALSE where shipper_id = %s"
     cursor.execute(request, (shipper.shipper_id,))
     bot.send_message(chat_id=mes.chat_id, text="Готово! Вы снова можете получать сообщения от этого человека")
-
-
