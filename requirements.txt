@@ -3,3 +3,4 @@ psycopg2-binary
 pytz
 tzlocal
 PySocks
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
